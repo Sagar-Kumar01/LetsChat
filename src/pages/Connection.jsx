@@ -80,7 +80,7 @@ const Connection = () => {
                     }
                     {
                       currentTab === 'Connection' && (
-                        <button onClick={()=>navigate(`/Message/${user._id}`)} className='w-full p-2 text-sm rounded bg-slate-200 hover:bg-slate-300 text-slate-800 active:scale-95 transition cursor-pointer
+                        <button onClick={()=>navigate(`/Messages/${user._id}`)} className='w-full p-2 text-sm rounded bg-slate-200 hover:bg-slate-300 text-slate-800 active:scale-95 transition cursor-pointer
                         flex items-center justify-center gap-1'
                         ><MessageSquare className='w-4 h-4'/> Message</button>
                       )
