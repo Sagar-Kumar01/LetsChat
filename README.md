@@ -8,11 +8,9 @@ Authentication is powered by **Clerk**, UI by **TailwindCSS**, icons by **Lucide
 
 ## Live Demo
 
-Check out the live demo of LetsChat: [https://lets-chat-alpha.vercel.app/](https://lets-chat-alpha.vercel.app/)
+Check out the live demo of LetsChat: [LetsChat](https://lets-chat-alpha.vercel.app/)
 
 ## 📸 Screenshots
-
-> Replace the below placeholder image paths with your own screenshots.
 
 ### Login / Signup  
 ![Login](./public/screenshots/login.jpeg)
@@ -85,36 +83,37 @@ Check out the live demo of LetsChat: [https://lets-chat-alpha.vercel.app/](https
 
 ## 📁 Folder Structure
 
-src/
-│── assets/
+📂 src
 │
-│── components/
-│ ├── Loading.jsx
-│ ├── MenuItem.jsx
-│ ├── PostCard.jsx
-│ ├── ProfileModel.jsx
-│ ├── RecentMessages.jsx
-│ ├── Sidebar.jsx
-│ ├── StoryBar.jsx
-│ ├── StoryModel.jsx
-│ ├── StoryViewer.jsx
-│ ├── UserCard.jsx
-│ └── UserProfileInfo.jsx
+├── 📁 assets
 │
-│── pages/
-│ ├── ChatBox.jsx
-│ ├── Connection.jsx
-│ ├── CreatePost.jsx
-│ ├── Discover.jsx
-│ ├── Feed.jsx
-│ ├── Layout.jsx
-│ ├── Login.jsx
-│ ├── Messages.jsx
-│ └── Profile.jsx
+├── 📁 components
+│ ├── 📄 Loading.jsx
+│ ├── 📄 MenuItem.jsx
+│ ├── 📄 PostCard.jsx
+│ ├── 📄 ProfileModel.jsx
+│ ├── 📄 RecentMessages.jsx
+│ ├── 📄 Sidebar.jsx
+│ ├── 📄 StoryBar.jsx
+│ ├── 📄 StoryModel.jsx
+│ ├── 📄 StoryViewer.jsx
+│ ├── 📄 UserCard.jsx
+│ └── 📄 UserProfileInfo.jsx
 │
-├── App.jsx
-├── main.jsx
-└── index.css
+├── 📁 pages
+│ ├── 📄 ChatBox.jsx
+│ ├── 📄 Connection.jsx
+│ ├── 📄 CreatePost.jsx
+│ ├── 📄 Discover.jsx
+│ ├── 📄 Feed.jsx
+│ ├── 📄 Layout.jsx
+│ ├── 📄 Login.jsx
+│ ├── 📄 Messages.jsx
+│ └── 📄 Profile.jsx
+│
+├── 📄 App.jsx
+├── 📄 main.jsx
+└── 📄 index.css
 
 
 ---
