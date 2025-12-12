@@ -83,38 +83,37 @@ Check out the live demo of LetsChat: [LetsChat](https://lets-chat-alpha.vercel.a
 
 ## 📁 Folder Structure
 
+
+<pre>
 📂 src
-│
 ├── 📁 assets
-│
 ├── 📁 components
-│ ├── 📄 Loading.jsx
-│ ├── 📄 MenuItem.jsx
-│ ├── 📄 PostCard.jsx
-│ ├── 📄 ProfileModel.jsx
-│ ├── 📄 RecentMessages.jsx
-│ ├── 📄 Sidebar.jsx
-│ ├── 📄 StoryBar.jsx
-│ ├── 📄 StoryModel.jsx
-│ ├── 📄 StoryViewer.jsx
-│ ├── 📄 UserCard.jsx
-│ └── 📄 UserProfileInfo.jsx
-│
+│   ├── 📄 Loading.jsx
+│   ├── 📄 MenuItem.jsx
+│   ├── 📄 PostCard.jsx
+│   ├── 📄 ProfileModel.jsx
+│   ├── 📄 RecentMessages.jsx
+│   ├── 📄 Sidebar.jsx
+│   ├── 📄 StoryBar.jsx
+│   ├── 📄 StoryModel.jsx
+│   ├── 📄 StoryViewer.jsx
+│   ├── 📄 UserCard.jsx
+│   └── 📄 UserProfileInfo.jsx
 ├── 📁 pages
-│ ├── 📄 ChatBox.jsx
-│ ├── 📄 Connection.jsx
-│ ├── 📄 CreatePost.jsx
-│ ├── 📄 Discover.jsx
-│ ├── 📄 Feed.jsx
-│ ├── 📄 Layout.jsx
-│ ├── 📄 Login.jsx
-│ ├── 📄 Messages.jsx
-│ └── 📄 Profile.jsx
-│
+│   ├── 📄 ChatBox.jsx
+│   ├── 📄 Connection.jsx
+│   ├── 📄 CreatePost.jsx
+│   ├── 📄 Discover.jsx
+│   ├── 📄 Feed.jsx
+│   ├── 📄 Layout.jsx
+│   ├── 📄 Login.jsx
+│   ├── 📄 Messages.jsx
+│   └── 📄 Profile.jsx
+
 ├── 📄 App.jsx
 ├── 📄 main.jsx
 └── 📄 index.css
-
+</pre>
 
 ---
 
