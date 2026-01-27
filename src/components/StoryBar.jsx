@@ -1,18 +1,24 @@
 import React, { useEffect, useState } from "react";
-import { dummyStoriesData } from "../assets/assets";
 import { Plus } from "lucide-react";
 import moment from "moment";
 import StoryModel from "./StoryModel";
 import StoryViewer from "./StoryViewer";
+import { useAuth } from "../context/AuthContext.jsx";
 
 const StoryBar = () => {
   const [stories, setStories] = useState([]);
   const [showModel, setShowModel] = useState(false);
   const [viewStory, setViewStory] = useState(null);
+  const { token } = useAuth();
 
   const fetchStories = async () => {
-    setStories(dummyStoriesData);
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/stories`, {
+      headers: {},
+    });
+    const data = await res.json();
+    if (data.success) setStories(data.stories.flatMap((s) => s.stories));
   };
+  
   useEffect(() => {
     fetchStories();
   }, []);
@@ -21,7 +27,8 @@ const StoryBar = () => {
     <div className="w-screen sm:w-[calc(100vw-240px)] lg:max-w-2xl no-scrollbar overflow-x-auto px-4">
       <div className="flex gap-4 pb-5">
         {/* Add Story Card */}
-        <div onClick={()=>setShowModel(true)}
+        <div
+          onClick={() => setShowModel(true)}
           className="rounded-lg shadow-sm min-w-[120px] max-w-[120px] max-h-[160px]
       aspect-[3/4] cursor-pointer hover:shadow-lg transition-all duration-200
       border-dashed border-indigo-300 bg-gradient-to-b from-indigo-100 to-indigo-200"
@@ -39,7 +46,8 @@ const StoryBar = () => {
             key={index}
             className={`relative rounded-lg shadow min-w-30 max-w-30 max-h-40 cursor-pointer hover:shadow-lg
                     transition-all duration-200 bg-gradient-to-b from-indigo-500 to-purple-600 hover:from-indigo-700 hover:from-indigo-700
-                    hover:to-purple-800 active:scale-95`} onClick={()=>setViewStory(story)}
+                    hover:to-purple-800 active:scale-95`}
+            onClick={() => setViewStory(story)}
           >
             <img
               src={story.user.profile_picture}
@@ -75,9 +83,13 @@ const StoryBar = () => {
         ))}
       </div>
       {/* Add Story Model */}
-      {showModel && <StoryModel setShowModel={setShowModel} fetchStories={fetchStories}/>}
+      {showModel && (
+        <StoryModel setShowModel={setShowModel} fetchStories={fetchStories} />
+      )}
       {/* Story Viewer */}
-      {viewStory && <StoryViewer viewStory={viewStory} setViewStory={setViewStory}/>}
+      {viewStory && (
+        <StoryViewer viewStory={viewStory} setViewStory={setViewStory} />
+      )}
     </div>
   );
 };

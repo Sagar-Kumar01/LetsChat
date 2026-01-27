@@ -1,6 +1,7 @@
 import { ArrowLeft, Sparkle, TextInitial, Upload } from "lucide-react";
 import React, { useState } from "react";
 import toast from "react-hot-toast";
+import { useAuth } from "../context/AuthContext.jsx";
 
 function StoryModel({ setShowModel, fetchStories }) {
   const bgColor = [
@@ -17,18 +18,61 @@ function StoryModel({ setShowModel, fetchStories }) {
   const [text, setText] = useState("");
   const [media, setMedia] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
+  const { token } = useAuth();
 
   const handelMediaUpload = (e) => {
     const file = e.target.files?.[0];
     if (file) {
       setMedia(file);
       setPreviewUrl(URL.createObjectURL(file));
-      {
-        /* It is widely used in JavaScript for previewing local files without uploading them to a server.*/
-      }
     }
   };
-  const handelCreateStory = async () => {};
+
+  const handelCreateStory = async () => {
+    if (!text.trim() && !media) {
+      throw new Error('Please add text or media');
+    }
+    
+    try {
+      const formData = new FormData();
+      formData.append('content', text);
+      formData.append('background_color', background);
+      
+      if (media) {
+        console.log('Creating story with media:', {
+          filename: media.name,
+          type: media.type,
+          size: media.size
+        });
+        formData.append('media', media);
+      } else {
+        console.log('Creating text-only story:', text.substring(0, 50));
+      }
+      
+      console.log('Story FormData entries:', Array.from(formData.entries()).map(([k, v]) => 
+        [k, v instanceof File ? `File(${v.name}, ${v.type})` : v]
+      ));
+      
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/stories`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData
+      });
+      
+      console.log('Story response status:', res.status);
+      
+      const data = await res.json();
+      console.log('Story response:', data);
+      
+      if (!data.success) throw new Error(data.message);
+      
+      fetchStories();
+      setShowModel(false);
+    } catch (error) {
+      console.error('Error creating story:', error);
+      throw error;
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-110 min-h-screen bg-black/80 backdrop-blur text-white flex items-center justify-center p-4">

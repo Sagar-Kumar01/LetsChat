@@ -1,19 +1,61 @@
-import React, { useState } from 'react'
-import { dummyUserData } from '../assets/assets';
+import  { useState } from 'react'
 import { Image, X } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useAuth } from '../context/AuthContext.jsx';
+import { useNavigate } from 'react-router-dom';
 
 const CreatePost = () => {
-  const [content,setContent] = useState('');
-  const [images,setImages] = useState([]);
+  const [content, setContent] = useState('');
+  const [images, setImages] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const { token, user } = useAuth();
+  const navigate = useNavigate();
 
-  const [loading,setLoading] = useState(false);
-
-  const user = dummyUserData;
-
-  const handelSubmit = async()=>{
-
-  }
+  const handelSubmit = async () => {
+    if (!content.trim() && images.length === 0) {
+      throw new Error('Please add content or images');
+    }
+    
+    setLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append('content', content);
+      formData.append('post_type', images.length > 0 ? 'photo' : 'text');
+      
+      console.log('Creating post with:', {
+        content: content.substring(0, 50),
+        images: images.length,
+        imageFiles: images.map(img => ({ name: img.name, size: img.size, type: img.type }))
+      });
+      
+      images.forEach((img) => {
+        console.log('Appending image:', img.name, img.type, img.size);
+        formData.append('image_urls', img);
+      });
+      
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/posts`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData
+      });
+      
+      console.log('Post response status:', res.status);
+      
+      const data = await res.json();
+      console.log('Post response:', data);
+      
+      if (!data.success) throw new Error(data.message);
+      
+      setContent('');
+      setImages([]);
+      navigate('/');
+    } catch (error) {
+      console.error('Error publishing post:', error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className='min-h-screen bg-gradient-to-b from-slate-50 to-white'>
@@ -27,10 +69,10 @@ const CreatePost = () => {
         <div className='max-w-xl bg-white p-4 sm:p-8 sm:pb-3 rounded-xl shadow-md space-y-4'>
           {/* Heder */}
           <div className="flex items-center gap-3">
-            <img src={user.profile_picture} alt="" className='w-12 h-12 rounded-full shadow'/>
+            <img src={user?.profile_picture || '/default-avatar.png'} alt="" className='w-12 h-12 rounded-full shadow'/>
             <div className="">
-              <h2 className='font-semibold'>{user.full_name}</h2>
-              <p className='text-sm text-gray-500'>@{user.username}</p>
+              <h2 className='font-semibold'>{user?.full_name || 'User'}</h2>
+              <p className='text-sm text-gray-500'>@{user?.username || 'unknown'}</p>
             </div>
           </div>
           {/* Textarea */}

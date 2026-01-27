@@ -1,22 +1,52 @@
-import React from 'react'
-import { dummyUserData } from '../assets/assets'
+import React, { useEffect } from 'react'
 import { Pencil } from 'lucide-react';
 import { useState } from 'react';
+import { useAuth } from '../context/AuthContext.jsx';
 
 const ProfileModel = ({setShowEdit}) => {
-    const user = dummyUserData;
+    const { user, token } = useAuth();
     const [editForm,setEditForm] = useState({
-        username:user.username,
-        bio:user.bio,
+        username:user?.username || '',
+        bio:user?.bio || '',
         profile_picture:null,
-        location:user.location,
-        full_name:user.full_name,
+        location:user?.location || '',
+        full_name:user?.full_name || '',
         cover_photo:null,
     });
 
     const handleChange = async (e) => {
         e.preventDefault();
+        try{
+            const formData = new FormData();
+            formData.append('username', editForm.username);
+            formData.append('bio', editForm.bio);
+            formData.append('location', editForm.location);
+            formData.append('full_name', editForm.full_name);
+            if (editForm.profile_picture) formData.append('profile_picture', editForm.profile_picture);
+            if (editForm.cover_photo) formData.append('cover_photo', editForm.cover_photo);
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/api/users/me`,{
+                method:'PATCH',
+                headers:{ Authorization: `Bearer ${token}` },
+                body: formData
+            });
+            const data = await res.json();
+            if(data.success){
+                setShowEdit(false);
+            }
+        }catch(e){
+            console.error("Error updating profile:", e);
+        }
     }
+    useEffect(()=>{
+        setEditForm({
+            username:user?.username || '',
+            bio:user?.bio || '',
+            profile_picture:null,
+            location:user?.location || '',
+            full_name:user?.full_name || '',
+            cover_photo:null,
+        })
+    },[user?._id])
 
   return (
     <div className='fixed top-0 bottom-0 left-0 right-0 z-110 h-screen overflow-y-scroll bg-black/50'>
@@ -32,7 +62,7 @@ const ProfileModel = ({setShowEdit}) => {
                             <input hidden type="file" accept='image/*' id='profile_picture' className='w-full p-3 border-gray-200 rounded-lg'
                             onChange={(e)=>setEditForm({...editForm,profile_picture:e.target.files[0]})}/>
                             <div className='group/profile relative'>
-                            <img src={editForm.profile_picture ? URL.createObjectURL(editForm.profile_picture) : user.profile_picture} alt="" 
+                            <img src={editForm.profile_picture ? URL.createObjectURL(editForm.profile_picture) : user?.profile_picture || '/default-avatar.png'} alt="" 
                             className='w-24 h-24 rounded-full object-cover'/>
 
                             <div className='absolute hidden group-hover/profile:flex top-0 left-0 right-0 bottom-0 bg-black/20
@@ -49,7 +79,7 @@ const ProfileModel = ({setShowEdit}) => {
                             <input hidden type="file" accept='image/*' id='cover_photo' className='w-full p-3 border-gray-200 rounded-lg'
                             onChange={(e)=>setEditForm({...editForm,cover_photo:e.target.files[0]})}/>
                             <div className='group/cover relative'>
-                                <img src={editForm.cover_photo ? URL.createObjectURL(editForm.cover_photo) : user.cover_photo} alt="" 
+                                <img src={editForm.cover_photo ? URL.createObjectURL(editForm.cover_photo) : user?.cover_photo || ''} alt="" 
                                 className='w-80 h-40 rounded-lg bg-gradient-to-r from-indigo-200 via-purple-200 to-pink-200 object-cover mt-2'/>
                                 <div className='absolute hidden group-hover/cover:flex top-0 left-0 right-0 bottom-0 bg-black/20 rounded-lg
                                 items-center justify-center'>

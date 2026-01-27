@@ -8,12 +8,12 @@ import Connection from './pages/Connection'
 import Discover from './pages/Discover'
 import Profile from './pages/Profile'
 import CreatePost from './pages/CreatePost'
-import {useUser} from '@clerk/clerk-react'
+import { useAuth } from './context/AuthContext.jsx'
 import  Layout  from './pages/Layout'
 import {Toaster} from 'react-hot-toast'
 
 function App() {
-  const {user} = useUser();
+  const { user } = useAuth();
   return (
     <>
     <Toaster/>

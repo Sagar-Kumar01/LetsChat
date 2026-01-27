@@ -1,14 +1,13 @@
 import React from "react";
-import { assets, dummyUserData } from "../assets/assets";
+import { assets } from "../assets/assets";
 import { Link, useNavigate } from "react-router-dom";
 import MenuItem from "./MenuItem";
 import { CirclePlus, LogOut } from "lucide-react";
-import {UserButton,useClerk} from '@clerk/clerk-react'
+import { useAuth } from "../context/AuthContext.jsx";
 
 const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
     const navigate = useNavigate();
-    const user = dummyUserData;
-    const {signOut} = useClerk();
+    const { user, logout } = useAuth();
   return (
     <div
       className={`w-60 xl:w-72 bg-white border-r border-gray-200 flex flex-col justify-between items-center max-sm:absolute top-0 bottom-0 z-20 ${
@@ -27,13 +26,13 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
         </div>
         <div className="w-full border-t border-gray-200 p-4 px-7 flex items-center justify-between">
             <div className="flex gap-2 items-center cursor-pointer">
-                <UserButton/>
+                <img src={user?.profile_picture || '/default-avatar.png'} className="w-8 h-8 rounded-full" />
                 <div>
-                    <h1 className="text-sm font-medium">{user.full_name}</h1>
-                    <p className="text-xs text-gray-500">@{user.username}</p>
+                    <h1 className="text-sm font-medium">{user?.full_name || 'User'}</h1>
+                    <p className="text-xs text-gray-500">@{user?.username || 'username'}</p>
                 </div>
             </div>
-            <LogOut className="w-4.5 text-gray-400 hover:text-gray-700 transition cursor-pointer" onClick={signOut}/>
+            <LogOut className="w-4.5 text-gray-400 hover:text-gray-700 transition cursor-pointer" onClick={logout}/>
         </div>
     </div>
   );
