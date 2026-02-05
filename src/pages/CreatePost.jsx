@@ -5,38 +5,68 @@ import { useAuth } from '../context/AuthContext.jsx';
 import { useNavigate } from 'react-router-dom';
 
 const CreatePost = () => {
+
   const [content, setContent] = useState('');
-  const [images, setImages] = useState([]);
+  const [images, setImages] = useState("");
+
   const [loading, setLoading] = useState(false);
   const { token, user } = useAuth();
   const navigate = useNavigate();
 
+  const handelMediaUpload = (e) => {
+    const file = e.target.files?.[0];
+
+    if (file) {
+      setImages(file);
+    }
+  };
+
+  const uploadToCloudinary = async (file) => {
+    const formData = new FormData();
+    const uploadPreset = import.meta.env.VITE_CLOUDINARY_PRESET;
+
+    formData.append("file", file);
+    formData.append("upload_preset", uploadPreset);
+
+    const res = await fetch(
+      `https://api.cloudinary.com/v1_1/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}/image/upload`,
+      { method: "POST", body: formData }
+    );
+
+    const data = await res.json();
+
+    if (!data.secure_url) throw new Error("Cloudinary upload failed");
+
+    return {
+      url: data.secure_url,
+      type: file.type.startsWith("image") ? "image" : "video",
+    };
+  };
+
+
+
   const handelSubmit = async () => {
-    if (!content.trim() && images.length === 0) {
+    if (!content.trim() && !images) {
       throw new Error('Please add content or images');
     }
+
+      let uploadedMedia = null;
+
+      if (images instanceof File) {
+        uploadedMedia = await uploadToCloudinary(images);
+      }
     
     setLoading(true);
     try {
-      const formData = new FormData();
-      formData.append('content', content);
-      formData.append('post_type', images.length > 0 ? 'photo' : 'text');
-      
-      console.log('Creating post with:', {
-        content: content.substring(0, 50),
-        images: images.length,
-        imageFiles: images.map(img => ({ name: img.name, size: img.size, type: img.type }))
-      });
-      
-      images.forEach((img) => {
-        console.log('Appending image:', img.name, img.type, img.size);
-        formData.append('image_urls', img);
-      });
       
       const res = await fetch(`${import.meta.env.VITE_API_URL}/api/posts`, {
         method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
-        body: formData
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          content,
+          image_urls: uploadedMedia ? uploadedMedia.url : "",
+          post_type: uploadedMedia ? 'photo' : 'text',
+        })
       });
       
       console.log('Post response status:', res.status);
@@ -47,8 +77,10 @@ const CreatePost = () => {
       if (!data.success) throw new Error(data.message);
       
       setContent('');
-      setImages([]);
+      setImages("");
       navigate('/');
+      toast.success("Post Published!");
+
     } catch (error) {
       console.error('Error publishing post:', error);
       throw error;
@@ -79,18 +111,17 @@ const CreatePost = () => {
           <textarea className='w-full resize-none max-h-20 mt-4 text-sm outline-none placeholder:text-gray-400' placeholder="what's happening?..." onChange={(e)=>setContent(e.target.value)} value={content} />
 
             {/* Images */}
-            {images.length > 0 && 
+            {images && 
             <div className='flex flex-wrap gap-2 mt-2'>
               {
-                images.map((image,index)=>(
-                  <div key={index} className='relative group'>
-                    <img src={URL.createObjectURL(image)} alt="" className='h-12 rounded-md'/>
-                    <div onClick={()=>setImages(images.filter((_,idx)=>idx !== index))} className='absolute hidden group-hover:flex justify-center items-center top-0 right-0 bottom-0 left-0
+                
+                  <div className='relative group'>
+                    <img src={URL.createObjectURL(images)} alt="" className='h-12 rounded-md'/>
+                    <div onClick={()=>setImages(null)} className='absolute hidden group-hover:flex justify-center items-center top-0 right-0 bottom-0 left-0
                     bg-black/40 rounded cursor-pointer'>
                       <X className='w-6 h-6 text-white'/>
                     </div>
                   </div>
-                ))
               }
             </div>
             }
@@ -100,7 +131,7 @@ const CreatePost = () => {
               transition cursor-pointer'>
                 <Image className='size-6'/>
               </label>
-              <input type="file" id='images' className='hidden' multiple onChange={(e)=>setImages([...images,...e.target.files])} />
+              <input type="file" id='images' className='hidden' onChange={(e)=>setImages(e.target.files[0])} />
               <button disabled={loading} onClick={()=>toast.promise(
                 handelSubmit(),
                 {

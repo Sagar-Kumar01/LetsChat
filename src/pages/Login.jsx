@@ -4,7 +4,7 @@ import { Star } from "lucide-react";
 import { useAuth } from "../context/AuthContext.jsx";
 
 const Login = () => {
-  const { login, signup } = useAuth();
+  const { login, signup, isConnecting } = useAuth();
   const [mode, setMode] = useState("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -19,7 +19,12 @@ const Login = () => {
       if (mode === "login") {
         await login(email, password);
       } else {
-        const ok = await signup({ email, password, full_name: fullName, username });
+        const ok = await signup({
+          email,
+          password,
+          full_name: fullName,
+          username,
+        });
         if (ok) await login(email, password);
       }
     } finally {
@@ -117,8 +122,13 @@ const Login = () => {
             onClick={submit}
             className="w-full py-2 rounded bg-gradient-to-r from-indigo-500 to-purple-600 text-white active:scale-95"
           >
-            {loading ? "Please wait..." : mode === "login" ? "Login" : "Create Account"}
+            {loading
+              ? "Please wait..."
+              : mode === "login"
+                ? "Login"
+                : "Create Account"}
           </button>
+          <h1 style={{color:"red"}}>{isConnecting}</h1>
         </div>
       </div>
     </div>

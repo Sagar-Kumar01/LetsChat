@@ -1,5 +1,5 @@
 import { ArrowLeft, Sparkle, TextInitial, Upload } from "lucide-react";
-import React, { useState } from "react";
+import { useState } from "react";
 import toast from "react-hot-toast";
 import { useAuth } from "../context/AuthContext.jsx";
 
@@ -13,6 +13,7 @@ function StoryModel({ setShowModel, fetchStories }) {
     "#FF4081",
     "#42e0d1ff",
   ];
+
   const [mode, setMode] = useState("text");
   const [background, setBackground] = useState(bgColor[3]);
   const [text, setText] = useState("");
@@ -20,56 +21,74 @@ function StoryModel({ setShowModel, fetchStories }) {
   const [previewUrl, setPreviewUrl] = useState(null);
   const { token } = useAuth();
 
+  
   const handelMediaUpload = (e) => {
     const file = e.target.files?.[0];
+
     if (file) {
       setMedia(file);
       setPreviewUrl(URL.createObjectURL(file));
     }
   };
 
+  // ✅ Cloudinary upload function
+  const uploadToCloudinary = async (file) => {
+    const formData = new FormData();
+    const uploadPreset = import.meta.env.VITE_CLOUDINARY_PRESET;
+
+    formData.append("file", file);
+    formData.append("upload_preset", uploadPreset);
+
+    const res = await fetch(
+      `https://api.cloudinary.com/v1_1/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}/image/upload`,
+      { method: "POST", body: formData }
+    );
+
+    const data = await res.json();
+
+    if (!data.secure_url) throw new Error("Cloudinary upload failed");
+
+    return {
+      url: data.secure_url,
+      type: file.type.startsWith("image") ? "image" : "video",
+    };
+  };
+
+  // ✅ Upload first → then send to backend
   const handelCreateStory = async () => {
     if (!text.trim() && !media) {
-      throw new Error('Please add text or media');
+      throw new Error("Please add text or media");
     }
-    
+
     try {
-      const formData = new FormData();
-      formData.append('content', text);
-      formData.append('background_color', background);
-      
-      if (media) {
-        console.log('Creating story with media:', {
-          filename: media.name,
-          type: media.type,
-          size: media.size
-        });
-        formData.append('media', media);
-      } else {
-        console.log('Creating text-only story:', text.substring(0, 50));
+      let uploadedMedia = null;
+
+      if (media instanceof File) {
+        uploadedMedia = await uploadToCloudinary(media);
       }
-      
-      console.log('Story FormData entries:', Array.from(formData.entries()).map(([k, v]) => 
-        [k, v instanceof File ? `File(${v.name}, ${v.type})` : v]
-      ));
-      
+
       const res = await fetch(`${import.meta.env.VITE_API_URL}/api/stories`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
-        body: formData
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          content: text,
+          background_color: background,
+          media_url: uploadedMedia?.url,
+          media_type: uploadedMedia?.type,
+        }),
       });
-      
-      console.log('Story response status:', res.status);
-      
+
       const data = await res.json();
-      console.log('Story response:', data);
-      
+
       if (!data.success) throw new Error(data.message);
-      
+
       fetchStories();
       setShowModel(false);
     } catch (error) {
-      console.error('Error creating story:', error);
+      console.error("Error creating story:", error);
       throw error;
     }
   };
@@ -87,6 +106,7 @@ function StoryModel({ setShowModel, fetchStories }) {
           <h2 className="text-lg font-semibold">Create Story</h2>
           <span className="w-10"></span>
         </div>
+
         <div
           className="rounded-lg h-96 flex items-center justify-center relative"
           style={{ backgroundColor: background }}
@@ -99,9 +119,10 @@ function StoryModel({ setShowModel, fetchStories }) {
               value={text}
             />
           )}
+
           {mode === "media" &&
             previewUrl &&
-            (media?.type.startsWith("image") ? (
+            (media?.type?.startsWith?.("image") ? (
               <img
                 src={previewUrl}
                 alt="Preview"
@@ -111,6 +132,7 @@ function StoryModel({ setShowModel, fetchStories }) {
               <video src={previewUrl} className="object-contain max-h-full" />
             ))}
         </div>
+
         <div className="flex mt-4 gap-2">
           {bgColor.map((item) => (
             <button
@@ -121,6 +143,7 @@ function StoryModel({ setShowModel, fetchStories }) {
             ></button>
           ))}
         </div>
+
         <div className="flex gap-2 mt-4">
           <button
             onClick={() => {
@@ -132,12 +155,13 @@ function StoryModel({ setShowModel, fetchStories }) {
               mode === "text" ? "bg-white text-black" : "bg-zinc-800"
             }`}
           >
-            
-            <TextInitial size={18}/> Text
+            <TextInitial size={18} /> Text
           </button>
+
           <label
-            className={`flex-1 flex items-center justify-center gap-2 p-2 rounded cursor-pointer 
-  ${mode === "media" ? "bg-white text-black" : "bg-zinc-800"}`}
+            className={`flex-1 flex items-center justify-center gap-2 p-2 rounded cursor-pointer ${
+              mode === "media" ? "bg-white text-black" : "bg-zinc-800"
+            }`}
           >
             <input
               type="file"
@@ -151,13 +175,19 @@ function StoryModel({ setShowModel, fetchStories }) {
             <Upload size={18} /> Photo/video
           </label>
         </div>
-        <button onClick={()=>toast.promise(handelCreateStory(),{
-            loading:"Creating Story...",
-            success:<p>Story Created Successfully</p>,
-            error: e => <p>Story Creation Failed: {e.message}</p>,
-        })} className="flex items-center justify-center gap-2 text-white py-3 mt-4 w-full rounded bg-gradient-to-r from-indigo-500 to-purple-600
-        hover:from-indigo-600 hover:to-purple-700 active:scale-95 transition cursor-pointer">
-            <Sparkle size={18}/> create Story
+
+        <button
+          onClick={() =>
+            toast.promise(handelCreateStory(), {
+              loading: "Creating Story...",
+              success: <p>Story Created Successfully</p>,
+              error: (e) => <p>Story Creation Failed: {e.message}</p>,
+            })
+          }
+          className="flex items-center justify-center gap-2 text-white py-3 mt-4 w-full rounded bg-gradient-to-r from-indigo-500 to-purple-600
+        hover:from-indigo-600 hover:to-purple-700 active:scale-95 transition cursor-pointer"
+        >
+          <Sparkle size={18} /> create Story
         </button>
       </div>
     </div>

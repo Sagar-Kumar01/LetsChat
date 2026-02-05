@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 
 const AuthContext = createContext(null);
 
@@ -6,6 +6,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(localStorage.getItem("auth_token") || "");
   const [loading, setLoading] = useState(true);
+  const [isConnecting, setIsConnecting] = useState("Connecting to server... please wait.");
 
   const login = async (email, password) => {
     const res = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/login`, {
@@ -58,8 +59,31 @@ export const AuthProvider = ({ children }) => {
     loadMe();
   }, [token]);
 
+  useEffect(() => {
+  const checkHealth = async () => {
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/health`, {
+        method: 'GET'
+      });
+      
+      if (!res.ok) {
+        setIsConnecting("Unable to connect to server. Please try again later.");
+        // Maybe show a notification to user
+      }
+      if (res.ok) {
+        setIsConnecting(""); // Clear the connecting message    
+      }
+    } catch (err) {
+      setIsConnecting("Unable to connect to server. Please check your connection and try again.");
+      // Maybe show offline indicator
+    }
+  };
+
+  checkHealth();
+}, []);
+
   return (
-    <AuthContext.Provider value={{ user, token, login, signup, logout, loading }}>
+    <AuthContext.Provider value={{ user, token, login, signup, logout, loading, isConnecting }}>
       {children}
     </AuthContext.Provider>
   );

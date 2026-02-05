@@ -42,9 +42,9 @@ const PostCard = ({post}) => {
 
       {/* Images */}
       <div className="grid grid-cols-2 gap-2">
-        {post?.image_urls && post.image_urls.length > 0 && post.image_urls.map((img,index)=>(
-          <img key={index} src={img} alt="" className={`w-full h-48 rounded-lg object-cover ${post.image_urls.length === 1 ? 'col-span-2 h-auto' : ''}`}/>
-        ))}
+        {post?.image_urls && (
+          <img src={post.image_urls} alt="" className={`w-full h-48 rounded-lg object-cover ${post.image_urls.length === 1 ? 'col-span-2 h-auto' : ''}`}/>
+        )}
       </div>
       
       {/* Action */}
